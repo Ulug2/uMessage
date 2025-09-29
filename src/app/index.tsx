@@ -4,7 +4,7 @@ import { StyleSheet } from 'react-native';
 
 const HomeScreen: React.FC = () => {
     return (
-        <Redirect href={'/(home)/(tabs)'}/>
+        <Redirect href={'/(auth)/login'}/>
         //     <View style={styles.content}>
         //         <Text style={styles.title}>Home Screen</Text>
         //         <Text style={styles.subtitle}>Welcome to Messenger App!</Text>
