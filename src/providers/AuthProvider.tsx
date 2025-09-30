@@ -5,26 +5,59 @@ import { supabase } from '../lib/supabase';
 type AuthContext = {
     session: Session | null;
     user: User | null;
+    profile: any;
 }
 const AuthContext = createContext<AuthContext>({
     session: null,
     user: null,
+    profile: null
 })
 
-export default function AuthProvider({children}: PropsWithChildren){
+export default function AuthProvider({ children }: PropsWithChildren) {
 
     const [session, setSession] = useState<Session | null>(null)
+    const [profile, setProfile] = useState(null)
+
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
-        setSession(session)
+            setSession(session)
         })
         supabase.auth.onAuthStateChange((_event, session) => {
-        setSession(session)
+            setSession(session)
         })
     }, [])
 
+    useEffect(() => {
+        if (!session?.user) {
+            setProfile(null)
+            return;
+        }
+
+        const fetchProfile = async () => {
+            try {
+                let { data, error } = await supabase
+                    .from('profiles')
+                    .select("*")
+                    .eq('id', session?.user.id)
+                    .single()
+
+                if (error) {
+                    console.error('Profile fetch error:', error);
+                } else {
+                    console.log('Profile fetched:', data);
+                }
+                setProfile(data)
+            } catch (error) {
+                console.error('Profile fetch error:', error);
+            }
+        }
+
+        fetchProfile();
+
+    }, [session?.user])
+
     return (
-        <AuthContext.Provider value={{session, user: session?.user ?? null}}>
+        <AuthContext.Provider value={{ session, user: session?.user ?? null, profile }}>
             {children}
         </AuthContext.Provider>
     )
