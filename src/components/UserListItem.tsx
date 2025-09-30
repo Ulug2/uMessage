@@ -1,4 +1,7 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useChatContext } from "stream-chat-expo";
+import { useAuth } from "../providers/AuthProvider";
 
 interface Profile {
     id: string;
@@ -9,10 +12,38 @@ interface Profile {
 
 interface UserListItemProps {
     user: Profile;
-    onPress?: () => void;
+    
 }
 
-const UserListItem = ({ user, onPress }: UserListItemProps) => {
+
+
+const UserListItem = ({ user }: UserListItemProps) => {
+
+    const {client} = useChatContext()
+    const {user:me} = useAuth()
+    const router = useRouter()
+
+    const onPress = async () => {
+        if (!me) {
+            Alert.alert('Authentication Error', 'Please sign in to start a conversation');
+            return;
+        }
+
+        try {
+            const channel = client.channel('messaging', {
+                members: [me.id, user.id],
+            });
+
+            await channel.watch();
+            
+            // Navigate to the channel after creation
+            router.replace(`/channel/${channel.cid}`);
+        } catch (error) {
+            console.error('Failed to create channel:', error);
+            Alert.alert('Error', 'Failed to start conversation');
+        }
+    };
+
     return (
         <TouchableOpacity style={styles.container} onPress={onPress}>
             <View style={styles.avatarContainer}>

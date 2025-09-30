@@ -17,6 +17,17 @@ export default function ChatProvider({ children }: PropsWithChildren) {
             return
         }
         const connect = async () => {
+            // Check if we're already connected to the same user
+            if (client.userID === profile.id) {
+                setIsReady(true);
+                return;
+            }
+
+            // Disconnect any existing user
+            if (client.userID) {
+                await client.disconnectUser();
+            }
+
             await client.connectUser(
                 {
                     id: profile.id,
