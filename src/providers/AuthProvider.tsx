@@ -57,7 +57,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
     }, [session?.user])
 
     return (
-        <AuthContext.Provider value={{ session, user: session?.user ?? null, profile }}>
+        <AuthContext.Provider value={{ session, user: session?.user || null, profile }}>
             {children}
         </AuthContext.Provider>
     )
